@@ -21,5 +21,8 @@
   "needGenerate": "Primero genera la plantilla.",
   "headerLine1": "myFont — escribe cada letra grande, dentro de su caja, sentada sobre la línea sólida.",
   "headerLine2": "Fantasma gris = tamaño sugerido, escríbela encima. Pluma oscura (0.5 mm+). Fotografía desde arriba con buena luz.",
-  "docTitle": "myFont — plantilla"
+  "docTitle": "myFont — plantilla",
+  "charsetLatin1": "Latino (\\u00a9\\u00ae\\u20ac\\u00ab\\u00bb\\u00df\\u00e6\\u2026)",
+  "charsetExtA": "Europeo central (\\u010d\\u0161\\u017e\\u2026)",
+  "charsetPro": "Signos pro (\\u2013\\u2014\\u2018\\u2019\\u201c\\u201d\\u2022\\u2026\\u20ac)"
 }

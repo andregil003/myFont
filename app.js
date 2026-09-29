@@ -1,14 +1,20 @@
-﻿/* myFont â€” client-side template generator (original code, calibrated geometry) */
+/* myFont - client-side template generator (original code, calibrated geometry) */
 (function () {
   'use strict';
 
-  var MINIMAL = ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,;:!?'-()@#&+/$\"").split("");
-  var SPANISH_EXTRA = "\u00d1\u00f1\u00c1\u00c9\u00cd\u00d3\u00da\u00e1\u00e9\u00ed\u00f3\u00fa\u00fc\u00bf\u00a1".split("");
+  var CS = window.MYFONT_CHARSETS;
+  var FULL = {
+    minimal: CS.minimal.split(''),
+    spanish: (CS.minimal + CS.spanish).split(''),
+    latin1: (CS.minimal + CS.spanish + CS.latin1).split(''),
+    exta: (CS.minimal + CS.spanish + CS.latin1 + CS.exta).split(''),
+    pro: (CS.minimal + CS.spanish + CS.latin1 + CS.exta + CS.pro).split('')
+  };
 
   // Calibrated geometry (points, top-down; flipped for pdf-lib bottom-up origin)
   var PAGE_W = 595.28, PAGE_H = 841.89, M = 40, HEADER_H = 70;
   var COLS = 6, ROWS = 7, GAP = 4;
-  var FS = 79, ASC = 0.718; // ghost ascender fills capLine..baseline; feet land on baseline
+  var FS = 75; // DejaVu Sans ghost: caps -0.7pt, arches +2pt (balanced fit to guide bands); feet exact on baseline
   var GREY = [0.784, 0.784, 0.784];       // #c8c8c8 guides
   var GHOST = [0.851, 0.851, 0.851];      // #d9d9d9 vanishes in thresholding
   var HDR1 = [0.6, 0.6, 0.6];
@@ -46,7 +52,7 @@
 
   function charset() {
     var v = $('sel-charset').value;
-    return v === 'spanish' ? MINIMAL.concat(SPANISH_EXTRA) : MINIMAL.slice();
+    return (FULL[v] || FULL.spanish).slice();
   }
 
   function flip(y) { return PAGE_H - y; }
@@ -61,14 +67,47 @@
     }
   }
 
+  async function loadFontBytes() {
+    try {
+      var r = await fetch('vendor/fonts/DejaVuSans.ttf');
+      if (r.ok) return await r.arrayBuffer();
+    } catch (e) { /* file:// or offline -> embedded */ }
+    var b64 = window.MYFONT_DEJAVU_B64;
+    var bin = atob(b64);
+    var buf = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    return buf;
+  }
+
+  function loadScript(src) {
+    return new Promise(function (res, rej) {
+      var sc = document.createElement("script");
+      sc.src = src;
+      sc.onload = res;
+      sc.onerror = rej;
+      document.head.appendChild(sc);
+    });
+  }
+
+  async function ensureLibs() {
+    if (!window.fontkit) await loadScript('vendor/fontkit.min.js');
+    if (!window.MYFONT_DEJAVU_B64) await loadScript("dejavu-b64.js");
+  }
+
   async function generate() {
+    try { await ensureLibs(); } catch (e) {
+      $('status').textContent = 'library load error: ' + e.message;
+      return;
+    }
     if (!window.PDFLib) { $('status').textContent = 'PDF engine missing (vendor/pdf-lib.min.js)'; return; }
     $('status').textContent = t('generating');
     var chars = charset();
     var withGhost = $('chk-ghost').checked;
     var PDFLib = window.PDFLib;
     var doc = await PDFLib.PDFDocument.create();
-    var helv = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+    doc.registerFontkit(window.fontkit);
+    var fontBytes = await loadFontBytes();
+  var customFont = await doc.embedFont(fontBytes);
 
     var gridW = PAGE_W - 2 * M;
     var gridH = PAGE_H - M - (M + HEADER_H);
@@ -79,10 +118,10 @@
     for (var p = 0; p < pages; p++) {
       var page = doc.addPage([PAGE_W, PAGE_H]);
       page.drawText('myFont', {
-        x: M, y: flip(M + 14), size: 14, font: helv, color: rgb(HDR1)
+        x: M, y: flip(M + 14), size: 14, font: customFont, color: rgb(HDR1)
       });
       page.drawText(t('headerLine1') + ' ' + t('headerLine2'), {
-        x: M, y: flip(M + 40), size: 8, font: helv, color: rgb(HDR2),
+        x: M, y: flip(M + 40), size: 8, font: customFont, color: rgb(HDR2),
         maxWidth: gridW, lineHeight: 10
       });
       var slice = chars.slice(p * perPage, (p + 1) * perPage);
@@ -106,14 +145,14 @@
         dashedH(page, x, x + w, capLine, 0.5);
 
         if (withGhost) {
-          var tw = helv.widthOfTextAtSize(g, FS);
+          var tw = customFont.widthOfTextAtSize(g, FS);
           page.drawText(g, {
             x: x + (w - tw) / 2, y: flip(baseline),
-            size: FS, font: helv, color: rgb(withGhostDebug() || GHOST)
+            size: FS, font: customFont, color: rgb(withGhostDebug() || GHOST)
           });
         }
         page.drawText(g, {
-          x: x + 3, y: flip(y + 12), size: 9, font: helv, color: rgb(GREY)
+          x: x + 3, y: flip(y + 12), size: 9, font: customFont, color: rgb(GREY)
         });
       });
     }

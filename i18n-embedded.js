@@ -23,7 +23,10 @@ window.MYFONT_I18N = {
     "needGenerate": "Primero genera la plantilla.",
     "headerLine1": "myFont \u2014 escribe cada letra grande, dentro de su caja, sentada sobre la l\u00ednea s\u00f3lida.",
     "headerLine2": "Fantasma gris = tama\u00f1o sugerido, escr\u00edbela encima. Pluma oscura (0.5 mm+). Fotograf\u00eda desde arriba con buena luz.",
-    "docTitle": "myFont \u2014 plantilla"
+    "docTitle": "myFont \u2014 plantilla",
+    "charsetLatin1": "Latino (\\u00a9\\u00ae\\u20ac\\u00ab\\u00bb\\u00df\\u00e6\\u2026)",
+    "charsetExtA": "Europeo central (\\u010d\\u0161\\u017e\\u2026)",
+    "charsetPro": "Signos pro (\\u2013\\u2014\\u2018\\u2019\\u201c\\u201d\\u2022\\u2026\\u20ac)"
   },
   "en": {
     "eyebrowTag": "template \u2192 font",
@@ -48,6 +51,9 @@ window.MYFONT_I18N = {
     "needGenerate": "Generate the template first.",
     "headerLine1": "myFont \u2014 write each letter large, inside its box, sitting on the solid line.",
     "headerLine2": "Grey ghost = suggested size, write over it. Dark pen (0.5 mm+). Photograph from above in good light.",
-    "docTitle": "myFont \u2014 template"
+    "docTitle": "myFont \u2014 template",
+    "charsetLatin1": "Latin (\\u00a9\\u00ae\\u20ac\\u00ab\\u00bb\\u00df\\u00e6\\u2026)",
+    "charsetExtA": "Central European (\\u010d\\u0161\\u017e\\u2026)",
+    "charsetPro": "Pro punctuation (\\u2013\\u2014\\u2018\\u2019\\u201c\\u201d\\u2022\\u2026\\u20ac)"
   }
 };
