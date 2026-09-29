@@ -3,7 +3,7 @@
   "heroTitle": "Make your own font",
   "lede": "Generate the template, fill it in by hand with a dark pen, photograph each page, and turn your handwriting into an installable font.",
   "charset": "Characters",
-  "charsetEs": "Spanish (Ñ, accents, ¿¡)",
+  "charsetEs": "Extended (Ñ, accents, ¿¡)",
   "charsetMin": "Minimal (A–Z a–z 0–9)",
   "ghost": "Ghost reference letter",
   "generate": "Generate template",
