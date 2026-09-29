@@ -152,11 +152,21 @@
     f.contentWindow.print();
   }
 
-  async function init() {
+  async function loadI18n() {
     try {
       var es = await (await fetch('i18n/es.json')).json();
       var en = await (await fetch('i18n/en.json')).json();
-      I18N = { es: es, en: en };
+      return { es: es, en: en };
+    } catch (e) {
+      // file:// or offline: fall back to embedded copy
+      if (window.MYFONT_I18N) return window.MYFONT_I18N;
+      throw e;
+    }
+  }
+
+  async function init() {
+    try {
+      I18N = await loadI18n();
     } catch (e) {
       $('status').textContent = 'i18n load error: ' + e.message;
       return;
