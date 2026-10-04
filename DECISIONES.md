@@ -20,3 +20,13 @@ Bitácora de decisiones del proyecto (la mantiene PUCK junto con André).
 - **Carga perezosa:** `fontkit` (1.5MB) + `dejavu-b64.js` (1MB) solo se descargan al pulsar Generar; la pagina inicial sigue ligera. `file://` y offline funcionan (fallbacks embebidos).
 - **QA por tier:** matriz 5 tiers x fantasma on/off (paginas + presencia), pixel estricto en spanish (0.90pt/2.92pt), generico en el resto (0 celdas vacias, solo flotantes/descendentes por diseno).
 - **Skill espejo:** `make-ref.js` con `--charset` tiers + `--font` (nota de recalibracion incluida).
+
+## 2026-10-04 — selector personalizado de caracteres (full scope)
+
+- **Opción "Personalizado" en el select:** panel con chips-checkbox por grupo (nombre + conteo) + campo de texto libre para caracteres sueltos. Los 5 presets quedan como atajos.
+- **9 grupos nuevos** además de los tiers: `kbd` (14), `math` (48), `greek` (49), `sub` (21), `arrows` (54), `curr` (20), `shapes` (18), `music` (7), `cyr` (287). Mismo gate de cobertura DejaVu en `build-tiers.py` (assert por grupo, autocontenido: cada grupo funciona solo).
+- **Charset custom = unión de grupos marcados + texto libre, sin duplicados** (π vive en math y greek → dedupe = 1 celda: 94+48+49 = 190, no 191).
+- **Sonda de cobertura en cliente:** fontkit comprueba cada carácter contra DejaVu; los no cubiertos se omiten con aviso en el status (ejemplo real: `가`). Dato: DejaVu 2.37 sí incluye U+1F600 (😀).
+- **Anti-carrera:** token `genSeq` en `generate()` — generaciones solapadas (cambios rápidos de chips) no se pisan: gana la más reciente.
+- **Fix i18n preexistente (be5942b):** `I18N_ADD` usaba escapes `\uXXXX` literales con backslash doble → la UI mostraba `s\u00edmbolos` crudo en latin1/exta/pro. Ahora van caracteres reales en el JSON; el ASCII-safe para `file://` lo hace `gen-embedded.py` (`ensure_ascii=True`).
+- **QA Playwright 12 checks:** carga inicial, picker show/hide, 14 conteos, combinación math+greek (190), texto libre con omitido `가`, custom vacío → aviso, preset pro (318/8p), i18n ES/EN, PDF blob `%PDF-` 447KB, labels sin `\u` crudos, 0 page errors. *Hallazgo de infra:* `networkidle` no sirve en esta página — el iframe del PDF (blob:) lo mantiene en vilo; se espera por estado del `#status`.

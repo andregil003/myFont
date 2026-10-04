@@ -2,7 +2,7 @@
 
 Genera plantillas PDF para crear tu propia tipografía manuscrita: imprímela, llénala a mano, fotografía cada página y convierte tu letra en una fuente instalable.
 
-- **Charlas minimal + español** (Ñ, tildes, ¿¡), con o sin **letra fantasma de referencia** calibrada (pisa la línea base exacta).
+- **Presets de un clic** (Mínimo → Signos pro, hasta 318 caracteres) o **selector personalizado**: 14 grupos combinables (matemáticos, griegos, sub/superíndices, flechas, monedas, formas, música, cirílico, símbolos de teclado…) + campo libre para caracteres sueltos, con o sin **letra fantasma de referencia** calibrada (pisa la línea base exacta).
 - **Bilingüe ES/EN** con i18n listo para más idiomas.
 - 100% estático, sin backend, sin CDNs: el motor PDF (`pdf-lib`, MIT) va vendoreado en `vendor/`.
 
@@ -25,6 +25,8 @@ Proyecto conectado al repo con auto-deploy en push a `main`. Build: ninguno (sit
 | `index.html`    | Página única: hero, controles, preview, guía                  |
 | `styles.css`    | Estilos propios con acentos Riso de 2 tintas                  |
 | `app.js`        | i18n + generador PDF en cliente (geometría calibrada propia)  |
+| `charsets-generated.js` | Charsets auto-generados: tiers + grupos del picker   |
+| `scripts/`      | `build-tiers.py` (charsets+i18n) y `gen-embedded.py` (i18n)   |
 | `i18n/es.json`  | Textos en español                                             |
 | `i18n/en.json`  | Textos en inglés (misma estructura de claves)                 |
 | `vendor/`       | `pdf-lib.min.js` vendoreado (MIT) — cero dependencias de red  |

@@ -11,6 +11,24 @@
     pro: (CS.minimal + CS.spanish + CS.latin1 + CS.exta + CS.pro).split('')
   };
 
+  // Independent groups for the custom picker (self-contained, combinatoria libre)
+  var GROUPS = {
+    min: CS.minimal.split(''),
+    es: CS.spanish.split(''),
+    latin1: CS.latin1.split(''),
+    exta: CS.exta.split(''),
+    pro: CS.pro.split(''),
+    kbd: (CS.kbd || '').split(''),
+    math: (CS.math || '').split(''),
+    greek: (CS.greek || '').split(''),
+    sub: (CS.sub || '').split(''),
+    arrows: (CS.arrows || '').split(''),
+    curr: (CS.curr || '').split(''),
+    shapes: (CS.shapes || '').split(''),
+    music: (CS.music || '').split(''),
+    cyr: (CS.cyr || '').split('')
+  };
+
   // Calibrated geometry (points, top-down; flipped for pdf-lib bottom-up origin)
   var PAGE_W = 595.28, PAGE_H = 841.89, M = 40, HEADER_H = 70;
   var COLS = 6, ROWS = 7, GAP = 4;
@@ -26,6 +44,7 @@
   var I18N = {};
   var lang = localStorage.getItem('myfont-lang') || 'es';
   var pdfUrl = null;
+  var genSeq = 0;
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -40,6 +59,9 @@
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
       el.innerHTML = t(el.getAttribute('data-i18n'));
     });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
+      el.placeholder = t(el.getAttribute('data-i18n-ph'));
+    });
     var hero = $('hero-title');
     hero.textContent = t('heroTitle');
     hero.setAttribute('data-t', t('heroTitle'));
@@ -52,8 +74,37 @@
 
   function charset() {
     var v = $('sel-charset').value;
-    return (FULL[v] || FULL.spanish).slice();
+    if (v !== 'custom') return (FULL[v] || FULL.spanish).slice();
+    var out = [], seen = Object.create(null);
+    function push(src) {
+      var arr = typeof src === 'string' ? Array.from(src) : src;
+      for (var i = 0; i < arr.length; i++) {
+        var c = arr[i];
+        if (!c || c.trim() === '' || seen[c]) continue;
+        seen[c] = 1;
+        out.push(c);
+      }
+    }
+    document.querySelectorAll('#grp-chips input[data-grp]').forEach(function (cb) {
+      if (cb.checked && GROUPS[cb.getAttribute('data-grp')]) push(GROUPS[cb.getAttribute('data-grp')]);
+    });
+    push($('free-chars').value);
+    return out;
   }
+
+  function togglePicker() {
+    $('picker').hidden = $('sel-charset').value !== 'custom';
+  }
+
+  function fillCounts() {
+    document.querySelectorAll('[data-cnt]').forEach(function (el) {
+      var g = GROUPS[el.getAttribute('data-cnt')];
+      el.textContent = g && g.length ? '(' + g.length + ')' : '';
+    });
+  }
+
+  // regenerate live when the picker changes (after the first generation)
+  function maybeRegen() { if (pdfUrl) generate(); }
 
   function flip(y) { return PAGE_H - y; }
 
@@ -95,6 +146,7 @@
   }
 
   async function generate() {
+    var seq = ++genSeq; // evita que generaciones solapadas se pisen (última gana)
     try { await ensureLibs(); } catch (e) {
       $('status').textContent = 'library load error: ' + e.message;
       return;
@@ -102,12 +154,29 @@
     if (!window.PDFLib) { $('status').textContent = 'PDF engine missing (vendor/pdf-lib.min.js)'; return; }
     $('status').textContent = t('generating');
     var chars = charset();
+    if (!chars.length) { $('status').textContent = t('pickSome'); return; }
     var withGhost = $('chk-ghost').checked;
     var PDFLib = window.PDFLib;
     var doc = await PDFLib.PDFDocument.create();
     doc.registerFontkit(window.fontkit);
     var fontBytes = await loadFontBytes();
-  var customFont = await doc.embedFont(fontBytes);
+    var customFont = await doc.embedFont(fontBytes);
+
+    // drop characters the font cannot render (ghost would be a .notdef box)
+    var skipped = [];
+    try {
+      var probe = window.fontkit.create(
+        fontBytes instanceof ArrayBuffer ? new Uint8Array(fontBytes) : fontBytes);
+      chars = chars.filter(function (c) {
+        if (probe.hasGlyphForCodePoint(c.codePointAt(0))) return true;
+        skipped.push(c);
+        return false;
+      });
+    } catch (e) { /* sin sonda: no filtrar */ }
+    if (!chars.length) { $('status').textContent = t('pickSome'); return; }
+    var warn = skipped.length
+      ? ' — ' + t('warnNoCover', { n: skipped.length, list: skipped.join(' ') })
+      : '';
 
     var gridW = PAGE_W - 2 * M;
     var gridH = PAGE_H - M - (M + HEADER_H);
@@ -158,12 +227,13 @@
     }
 
     var bytes = await doc.save();
+    if (seq !== genSeq) return; // obsoleta: otra generación más reciente corre
     if (pdfUrl) URL.revokeObjectURL(pdfUrl);
     pdfUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
     $('preview').src = pdfUrl;
     $('btn-download').disabled = false;
     $('btn-print').disabled = false;
-    $('status').textContent = t('ready', { pages: pages, chars: chars.length });
+    $('status').textContent = t('ready', { pages: pages, chars: chars.length }) + warn;
   }
 
   // Hook for QA: ?ghost=red paints ghosts red for pixel measurement
@@ -212,11 +282,18 @@
     }
     if (lang !== 'es' && lang !== 'en') lang = 'es';
     applyLang();
+    fillCounts();
+    togglePicker();
     $('btn-es').addEventListener('click', function () { lang = 'es'; applyLang(); });
     $('btn-en').addEventListener('click', function () { lang = 'en'; applyLang(); });
     $('btn-make').addEventListener('click', generate);
     $('btn-download').addEventListener('click', download);
     $('btn-print').addEventListener('click', printPdf);
+    $('sel-charset').addEventListener('change', function () { togglePicker(); maybeRegen(); });
+    document.querySelectorAll('#grp-chips input[data-grp]').forEach(function (cb) {
+      cb.addEventListener('change', maybeRegen);
+    });
+    $('free-chars').addEventListener('change', maybeRegen);
     generate();
   }
 

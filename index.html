@@ -34,14 +34,38 @@
           <select id="sel-charset">
             <option value="spanish" data-i18n="charsetEs">Extendido (Ñ, tildes, ¿¡)</option>
             <option value="minimal" data-i18n="charsetMin">Mínimo (A–Z a–z 0–9)</option>
-            <option value="latin1" data-i18n="charsetLatin1">Latino (&#169;&#174;&#8364;&#171;&#187;&#223;&#230;&#8230;)</option>
+            <option value="latin1" data-i18n="charsetLatin1">Latino (&#169;&#174;&#8364;&#171;&#187;&#223;&#8230;)</option>
             <option value="exta" data-i18n="charsetExtA">Europeo central (&#269;&#353;&#382;&#8230;)</option>
             <option value="pro" data-i18n="charsetPro">Signos pro (&#8211;&#8212;&#8216;&#8217;&#8220;&#8221;&#8226;&#8230;&#8364;)</option>
+            <option value="custom" data-i18n="charsetCustom">Personalizado (elige tus símbolos)</option>
           </select>
         </label>
         <label class="field check">
           <input type="checkbox" id="chk-ghost" checked>
           <span data-i18n="ghost">Letra fantasma de referencia</span>
+        </label>
+      </div>
+      <div class="picker" id="picker" hidden>
+        <p class="picker-title" data-i18n="pickerTitle">Grupos: marca los que quieras (puedes combinarlos)</p>
+        <div class="chips" id="grp-chips">
+          <label class="chip"><input type="checkbox" data-grp="min" checked><span data-i18n="charsetMin"></span><b class="cnt" data-cnt="min"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="es" checked><span data-i18n="charsetEs"></span><b class="cnt" data-cnt="es"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="latin1"><span data-i18n="charsetLatin1"></span><b class="cnt" data-cnt="latin1"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="exta"><span data-i18n="charsetExtA"></span><b class="cnt" data-cnt="exta"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="pro"><span data-i18n="charsetPro"></span><b class="cnt" data-cnt="pro"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="kbd"><span data-i18n="grpKbd"></span><b class="cnt" data-cnt="kbd"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="math"><span data-i18n="grpMath"></span><b class="cnt" data-cnt="math"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="greek"><span data-i18n="grpGreek"></span><b class="cnt" data-cnt="greek"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="sub"><span data-i18n="grpSub"></span><b class="cnt" data-cnt="sub"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="arrows"><span data-i18n="grpArrows"></span><b class="cnt" data-cnt="arrows"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="curr"><span data-i18n="grpCurr"></span><b class="cnt" data-cnt="curr"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="shapes"><span data-i18n="grpShapes"></span><b class="cnt" data-cnt="shapes"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="music"><span data-i18n="grpMusic"></span><b class="cnt" data-cnt="music"></b></label>
+          <label class="chip"><input type="checkbox" data-grp="cyr"><span data-i18n="grpCyr"></span><b class="cnt" data-cnt="cyr"></b></label>
+        </div>
+        <label class="field free">
+          <span data-i18n="freeLabel">O escribe / pega caracteres sueltos</span>
+          <input type="text" id="free-chars" data-i18n-ph="freePh" placeholder="ej.: α β ∞ ≡ ..." maxlength="600">
         </label>
       </div>
       <div class="actions">
